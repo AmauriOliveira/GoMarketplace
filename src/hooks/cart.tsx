@@ -43,11 +43,9 @@ const CartProvider: React.FC = ({ children }) => {
 
   const addToCart = useCallback(
     async (product: Product) => {
-      const { id } = product;
-
       const newProduct = products;
 
-      const index = newProduct.findIndex(item => item.id === id);
+      const index = newProduct.findIndex(item => item.id === product.id);
 
       if (index !== -1) {
         newProduct[index].quantity++;
@@ -62,30 +60,28 @@ const CartProvider: React.FC = ({ children }) => {
 
   const increment = useCallback(
     async id => {
-      const newProduct = products;
-
-      const index = products.findIndex(item => item.id === id);
-
-      newProduct[index].quantity++;
-
-      await AsyncStorage.setItem('keys', JSON.stringify(products));
+      const newProduct = products.map(product =>
+        product.id === id
+          ? { ...product, quantity: product.quantity + 1 }
+          : product,
+      );
 
       setProducts(newProduct);
+      await AsyncStorage.setItem('keys', JSON.stringify(products));
     },
     [products],
   );
 
   const decrement = useCallback(
     async id => {
-      const newProduct = products;
-
-      const index = products.findIndex(item => item.id === id);
-
-      newProduct[index].quantity--;
-
-      await AsyncStorage.setItem('keys', JSON.stringify(products));
+      const newProduct = products.map(product =>
+        product.id === id && product.quantity > 1
+          ? { ...product, quantity: product.quantity - 1 }
+          : product,
+      );
 
       setProducts(newProduct);
+      await AsyncStorage.setItem('keys', JSON.stringify(products));
     },
     [products],
   );
